@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2024", //Qual sintaxe usar para exportar os arquivos
+    "module": "NodeNext", // Sistema de módulos a ser usado
+    "moduleResolution": "NodeNext", // Resolução de módulos
+    "lib": ["ES2024", "DOM"], // Quais recursos eu quero usar
+    "strict": true, // Ativa todas as verificações de tipo estritas
+    "outDir": "./dist", // Pasta de saída para os arquivos compilados
+    "rootDir": "./src", // Pasta raiz dos arquivos de origem
+    "esModuleInterop": true, // Permite interoperabilidade entre módulos CommonJS e ES
+    "moduleDetection": "force", // Força a detecção de módulos
+    "skipLibCheck": true, // Ignora a verificação de tipos das bibliotecas padrão
+    "types": ["vitest/globals"] // Tipos adicionais para o Vitest
+  },
+  "include": ["src"] // Inclui todos os arquivos na pasta src
+}
