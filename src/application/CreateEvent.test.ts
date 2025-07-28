@@ -1,16 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { CreateEvent, EventRepository } from "./CreateEvent.js"
+import { EventRepositoryDrizzle } from "../resources/EventRepository.js"
+import { CreateEvent } from "./CreateEvent.js"
 
-describe("POST /events", () => {
-  class EventsRepositoryInMemory implements EventRepository {
-    events: any[] = []
+describe("Create Event", () => {
+  //Stub
 
-    async create(input: any) {
-      return input
-    }
-  }
+  // class EventsRepositoryInMemory implements EventRepository {
+  //   events: any[] = []
 
-  const createEvent = new CreateEvent(new EventsRepositoryInMemory())
+  //   async create(input: any) {
+  //     return input
+  //   }
+  // }
+
+  const createEvent = new CreateEvent(new EventRepositoryDrizzle())
   test("It should create a new event", async () => {
     const input = {
       name: "FSC Presencial",
@@ -25,6 +27,7 @@ describe("POST /events", () => {
     expect(output.id).toBeDefined()
     expect(output.name).toBe(input.name)
     expect(output.ticketPriceInCents).toBe(input.ticketPriceInCents)
+    expect(output.ownerId).toBe(input.ownerId)
   })
   test("It should return an error if ownwerId it is not a UUID", async () => {
     const input = {
@@ -90,5 +93,26 @@ describe("POST /events", () => {
 
     const output = createEvent.execute(input)
     await expect(output).rejects.toThrow("Date must be in the future")
+  })
+  test("It should return an error if already exists an event on the same date to the same latitude and longitude", async () => {
+    const date = new Date(new Date().setHours(new Date().getHours() + 1))
+
+    const input = {
+      name: "FSC Presencial",
+      ticketPriceInCents: 2000,
+      latitude: -90,
+      longitude: -180,
+      date,
+      ownerId: crypto.randomUUID(),
+    }
+
+    const output = await createEvent.execute(input)
+    expect(output.name).toBe(input.name)
+    expect(output.ticketPriceInCents).toBe(input.ticketPriceInCents)
+
+    const output2 = createEvent.execute(input)
+    await expect(output2).rejects.toThrow(
+      new Error("An event already exists for this date and location")
+    )
   })
 })

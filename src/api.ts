@@ -1,7 +1,7 @@
 import express from "express"
 
 import { CreateEvent } from "./application/CreateEvent.js"
-import { EventRepositoryDrizzle } from "./resources/EventsRepository.js"
+import { EventRepositoryDrizzle } from "./resources/EventRepository.js"
 
 const app = express()
 
