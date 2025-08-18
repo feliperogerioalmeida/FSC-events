@@ -5,18 +5,18 @@ import { OnSiteEvent } from "../application/entities/OnSiteEvents.js"
 import { db } from "../db/client.js"
 import * as schema from "../db/schema.js"
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is not set")
-}
-
 export class EventRepositoryDrizzle implements EventRepository {
-  constructor() {}
+  databsae: typeof db
+
+  constructor(database: typeof db) {
+    this.databsae = database
+  }
   async getByDateLatAndLong(params: {
     date: Date
     latitude: number
     longitude: number
   }): Promise<OnSiteEvent | null> {
-    const output = await db.query.eventsTable.findFirst({
+    const output = await this.databsae.query.eventsTable.findFirst({
       where: and(
         eq(schema.eventsTable.date, params.date),
         eq(schema.eventsTable.latitude, params.latitude.toString()),
