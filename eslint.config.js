@@ -7,7 +7,7 @@ import tseslint from "typescript-eslint"
 
 export default defineConfig([
   {
-    files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
+    files: ["**/*.{js,mjs,cjs,ts,mts,cts,ts,tsx}"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
