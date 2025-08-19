@@ -1,20 +1,23 @@
 import { db } from "../db/client.js"
+import { eventsTable } from "../db/schema.js"
+import { startPostgresTestDb } from "../db/test-db.js"
 import { EventRepositoryDrizzle } from "../resources/EventRepository.js"
 import { CreateEvent } from "./CreateEvent.js"
 
 describe("Create Event", () => {
-  //Stub
+  let database: typeof db
 
-  // class EventsRepositoryInMemory implements EventRepository {
-  //   events: any[] = []
+  beforeAll(async () => {
+    const testDatabase = await startPostgresTestDb()
+    database = testDatabase.db
+  })
 
-  //   async create(input: any) {
-  //     return input
-  //   }
-  // }
+  beforeEach(async () => {
+    await database.delete(eventsTable).execute()
+  })
 
-  const createEvent = new CreateEvent(new EventRepositoryDrizzle(db))
   test("It should create a new event", async () => {
+    const createEvent = new CreateEvent(new EventRepositoryDrizzle(database))
     const input = {
       name: "FSC Presencial",
       ticketPriceInCents: 1000,
@@ -31,6 +34,7 @@ describe("Create Event", () => {
     expect(output.ownerId).toBe(input.ownerId)
   })
   test("It should return an error if ownwerId it is not a UUID", async () => {
+    const createEvent = new CreateEvent(new EventRepositoryDrizzle(database))
     const input = {
       name: "FSC Presencial",
       ticketPriceInCents: 1000,
@@ -44,6 +48,7 @@ describe("Create Event", () => {
     await expect(output).rejects.toThrow(new Error("Invalid ownerId"))
   })
   test("It should return an error if price in cents is negative", async () => {
+    const createEvent = new CreateEvent(new EventRepositoryDrizzle(database))
     const input = {
       name: "FSC Presencial",
       ticketPriceInCents: -200,
@@ -57,6 +62,7 @@ describe("Create Event", () => {
     await expect(output).rejects.toThrow(new Error("Invalid Ticket Price"))
   })
   test("It should return an error if latitude is invalid", async () => {
+    const createEvent = new CreateEvent(new EventRepositoryDrizzle(database))
     const input = {
       name: "FSC Presencial",
       ticketPriceInCents: 1000,
@@ -70,6 +76,7 @@ describe("Create Event", () => {
     await expect(output).rejects.toThrow("Invalid Latitude")
   })
   test("It should return an error if longitude is invalid", async () => {
+    const createEvent = new CreateEvent(new EventRepositoryDrizzle(database))
     const input = {
       name: "FSC Presencial",
       ticketPriceInCents: 1000,
@@ -83,6 +90,7 @@ describe("Create Event", () => {
     await expect(output).rejects.toThrow("Invalid Longitude")
   })
   test("It should return an error if date is in the past", async () => {
+    const createEvent = new CreateEvent(new EventRepositoryDrizzle(database))
     const input = {
       name: "FSC Presencial",
       ticketPriceInCents: 1000,
@@ -96,6 +104,7 @@ describe("Create Event", () => {
     await expect(output).rejects.toThrow("Date must be in the future")
   })
   test("It should return an error if already exists an event on the same date to the same latitude and longitude", async () => {
+    const createEvent = new CreateEvent(new EventRepositoryDrizzle(database))
     const date = new Date(new Date().setHours(new Date().getHours() + 1))
 
     const input = {
