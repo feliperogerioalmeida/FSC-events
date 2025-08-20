@@ -1,5 +1,7 @@
+import fastifySwagger from "@fastify/swagger"
+import fastifySwaggerUi from "@fastify/swagger-ui"
 import fastify from "fastify"
-import { ZodTypeProvider } from "fastify-type-provider-zod"
+import { jsonSchemaTransform, ZodTypeProvider } from "fastify-type-provider-zod"
 import {
   serializerCompiler,
   validatorCompiler,
@@ -15,10 +17,32 @@ const app = fastify()
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
 
+await app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: "FSC Events",
+      description: "API for FSC Events",
+      version: "1.0.0",
+    },
+    servers: [
+      {
+        description: "Local server",
+        url: "http://localhost:3000",
+      },
+    ],
+  },
+  transform: jsonSchemaTransform,
+})
+
+await app.register(fastifySwaggerUi, {
+  routePrefix: "/docs",
+})
+
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "POST",
   url: "/events",
   schema: {
+    tags: ["Events"],
     body: z.object({
       name: z.string(),
       ticketPriceInCents: z.number(),
@@ -65,6 +89,8 @@ app.withTypeProvider<ZodTypeProvider>().route({
   },
 })
 
-app.listen({ port: 3000 }, () => {
-  console.log("Server is running on port 3000 ")
+await app.ready()
+
+await app.listen({ port: 8080 }, () => {
+  console.log("Server is running on port 8080 ")
 })
