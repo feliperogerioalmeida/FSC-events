@@ -75,6 +75,14 @@ app.withTypeProvider<ZodTypeProvider>().route({
         code: z.string(),
         message: z.string(),
       }),
+      409: z.object({
+        code: z.string(),
+        message: z.string(),
+      }),
+      500: z.object({
+        code: z.string(),
+        message: z.string(),
+      }),
     },
   },
   handler: async (req, res) => {
@@ -95,10 +103,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
       res.status(201).send({ ...event, date: event.date.toISOString() })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      if (
-        error instanceof InvalidParameterError ||
-        error instanceof EventAlreadyExistsError
-      ) {
+      if (error instanceof InvalidParameterError) {
         return res.status(400).send({
           code: error.code,
           message: error.message,
@@ -111,8 +116,14 @@ app.withTypeProvider<ZodTypeProvider>().route({
           message: error.message,
         })
       }
+      if (error instanceof EventAlreadyExistsError) {
+        return res.status(409).send({
+          code: error.code,
+          message: error.message,
+        })
+      }
       return res
-        .status(400)
+        .status(500)
         .send({ code: "SERVER_ERROR", message: error.message })
     }
   },
