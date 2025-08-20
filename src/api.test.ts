@@ -9,7 +9,7 @@ describe("POST /events", () => {
       ticketPriceInCents: 1000,
       latitude: -90,
       longitude: -180,
-      date: new Date().setHours(new Date().getHours() + 1),
+      date: new Date(new Date().setHours(new Date().getHours() + 1)),
       ownerId: crypto.randomUUID(),
     }
 
