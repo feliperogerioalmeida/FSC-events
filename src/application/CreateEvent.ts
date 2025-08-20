@@ -1,5 +1,8 @@
 import { OnSiteEvent } from "./entities/OnSiteEvents.js"
-import { InvalidOwnerIdError } from "./errors/index.js"
+import {
+  EventAlreadyExistsError,
+  InvalidParameterError,
+} from "./errors/index.js"
 
 interface Input {
   name: string
@@ -28,25 +31,25 @@ export class CreateEvent {
         ownerId
       )
     ) {
-      throw new InvalidOwnerIdError()
+      throw new InvalidParameterError("ownerId")
     }
 
     if (ticketPriceInCents < 0) {
-      throw new Error("Invalid Ticket Price")
+      throw new InvalidParameterError("ticketPriceInCents must be positive")
     }
 
     if (latitude < -90 || latitude > 90) {
-      throw new Error("Invalid Latitude")
+      throw new InvalidParameterError("latitude must be between -90 and 90")
     }
 
     if (longitude < -180 || longitude > 180) {
-      throw new Error("Invalid Longitude")
+      throw new InvalidParameterError("longitude must be between -180 and 180")
     }
 
     const now = new Date()
 
     if (date < now) {
-      throw new Error("Date must be in the future")
+      throw new InvalidParameterError("date must be in the future")
     }
 
     const existentEvent = await this.eventRepository.getByDateLatAndLong({
@@ -56,7 +59,7 @@ export class CreateEvent {
     })
 
     if (existentEvent) {
-      throw new Error("An event already exists for this date and location")
+      throw new EventAlreadyExistsError()
     }
 
     const event = await this.eventRepository.create({
