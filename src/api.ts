@@ -9,6 +9,7 @@ import {
 import z from "zod/v4"
 
 import { CreateEvent } from "./application/CreateEvent.js"
+import { InvalidOwnerIdError } from "./application/errors/index.js"
 import { db } from "./db/client.js"
 import { EventRepositoryDrizzle } from "./resources/EventRepository.js"
 
@@ -62,6 +63,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
         ownerId: z.uuid(),
       }),
       400: z.object({
+        code: z.string(),
         message: z.string(),
       }),
     },
@@ -84,7 +86,15 @@ app.withTypeProvider<ZodTypeProvider>().route({
       res.status(201).send({ ...event, date: event.date.toISOString() })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      return res.status(400).send({ message: error.message })
+      if (error instanceof InvalidOwnerIdError) {
+        return res.status(400).send({
+          code: error.code,
+          message: error.message,
+        })
+      }
+      return res
+        .status(400)
+        .send({ code: "SERVER_ERROR", message: error.message })
     }
   },
 })

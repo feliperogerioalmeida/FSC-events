@@ -3,6 +3,7 @@ import { eventsTable } from "../db/schema.js"
 import { startPostgresTestDb } from "../db/test-db.js"
 import { EventRepositoryDrizzle } from "../resources/EventRepository.js"
 import { CreateEvent } from "./CreateEvent.js"
+import { InvalidOwnerIdError } from "./errors/index.js"
 
 describe("Create Event", () => {
   const makeSut = () => {
@@ -54,7 +55,7 @@ describe("Create Event", () => {
     }
 
     const output = sut.execute(input)
-    await expect(output).rejects.toThrow(new Error("Invalid ownerId"))
+    await expect(output).rejects.toThrow(new InvalidOwnerIdError())
   })
   test("It should return an error if price in cents is negative", async () => {
     const { sut } = makeSut()
