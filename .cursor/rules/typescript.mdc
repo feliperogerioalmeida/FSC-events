@@ -1,0 +1,50 @@
+---
+globs: *.ts
+alwaysApply: false
+---
+
+**_NUNCA_** use o tipo `any`.
+**SEMPRE** use o type ao invés de interface.
+
+## Classes
+
+<!-- Regras de Classe -->
+
+- Sempre use private ou protected nas propriedades das classes. Exemplo:
+
+```typescript
+// Correto ✅
+
+class UserService{
+  private readonly repository: UserRepository
+  protected logger: Logger
+
+  constructor{repository: UserRepository}{
+    this.repository = repository
+  }
+}
+
+// Evite ❌
+
+class UserService{
+  public repository: UserRepository // expõe detalhes internos
+  logger: Logger // implicitamente public
+}
+```
+
+<!-- Regras de Classe -->
+
+## Funções
+
+**_SEMPRE_** que uma função receber mais de um parâmetro, receba um objeto como parâmetro. Exemplo:
+
+```typescript
+interface Input {
+  name: string
+  ownerId: string
+  latitue: number
+  longitude: number
+  ticketPriceInCents: number
+  date: Date
+}
+```
