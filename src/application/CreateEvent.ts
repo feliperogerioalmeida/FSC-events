@@ -12,6 +12,17 @@ interface Input {
   date: Date
   ownerId: string
 }
+
+export interface Output {
+  id: string
+  ownerId: string
+  name: string
+  ticketPriceInCents: number
+  date: Date
+  latitude: number
+  longitude: number
+}
+
 //Ports
 export interface EventRepository {
   create: (input: OnSiteEvent) => Promise<OnSiteEvent>
@@ -23,7 +34,7 @@ export interface EventRepository {
 }
 export class CreateEvent {
   constructor(private eventRepository: EventRepository) {}
-  async execute(input: Input) {
+  async execute(input: Input): Promise<Output> {
     const { name, ticketPriceInCents, latitude, longitude, date, ownerId } =
       input
     if (
