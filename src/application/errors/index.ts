@@ -22,7 +22,7 @@ export class EventAlreadyExistsError extends Error {
 export class NotFoundError extends Error {
   code = ErrorCode.NOT_FOUND
 
-  constructor(message: ErrorCode) {
+  constructor(message: string) {
     super(message)
   }
 }

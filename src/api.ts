@@ -14,6 +14,7 @@ import {
   InvalidParameterError,
   NotFoundError,
 } from "./application/errors/index.js"
+import { GetEvent } from "./application/GetEvent.js"
 import { db } from "./db/client.js"
 import { EventRepositoryDrizzle } from "./resources/EventRepository.js"
 
@@ -24,6 +25,7 @@ app.setSerializerCompiler(serializerCompiler)
 
 const eventRepositoryDrizzle = new EventRepositoryDrizzle(db)
 const createEvent = new CreateEvent(eventRepositoryDrizzle)
+const getEvent = new GetEvent(eventRepositoryDrizzle)
 
 await app.register(fastifySwagger, {
   openapi: {
@@ -126,6 +128,71 @@ app.withTypeProvider<ZodTypeProvider>().route({
       return res
         .status(500)
         .send({ code: "SERVER_ERROR", message: error.message })
+    }
+  },
+})
+
+app.withTypeProvider<ZodTypeProvider>().route({
+  method: "GET",
+  url: "/events/:id",
+  schema: {
+    tags: ["Events"],
+    params: z.object({
+      id: z.uuid(),
+    }),
+    response: {
+      200: z.object({
+        id: z.uuid(),
+        name: z.string(),
+        ticketPriceInCents: z.number(),
+        latitude: z.number(),
+        longitude: z.number(),
+        date: z.iso.datetime(),
+        ownerId: z.uuid(),
+      }),
+      400: z.object({
+        code: z.string(),
+        message: z.string(),
+      }),
+      404: z.object({
+        code: z.string(),
+        message: z.string(),
+      }),
+      500: z.object({
+        code: z.string(),
+        message: z.string(),
+      }),
+    },
+  },
+  handler: async (req, res) => {
+    const { id } = req.params
+    try {
+      const event = await getEvent.execute({
+        eventId: id,
+      })
+      return res.status(200).send({
+        ...event,
+        date: event.date.toISOString(),
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error(error)
+      if (error instanceof InvalidParameterError) {
+        return res.status(400).send({
+          code: error.code,
+          message: error.message,
+        })
+      }
+      if (error instanceof NotFoundError) {
+        return res.status(404).send({
+          code: error.code,
+          message: error.message,
+        })
+      }
+      return res.status(500).send({
+        code: "SERVER_ERROR",
+        message: error.message,
+      })
     }
   },
 })
